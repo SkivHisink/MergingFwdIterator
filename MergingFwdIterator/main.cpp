@@ -19,14 +19,13 @@ int main()
 	vector_of_iterators.emplace_back(third_container.begin(), third_container.end());
 	merge_range<std::vector<int>::iterator> merge_iter(vector_of_iterators);
 	auto tmp = merge_iter.begin();
-	for (auto i = 0; i < merge_iter.size() - 1; ++i)
-	{
-		auto tmp2 = tmp;
-		tmp2++;
-		if (*tmp.get() > *tmp2.get())
-		{
-			std::cout << "Something went wrong" << std::endl;
-		}
-		tmp = tmp2;
-	}
+	//for (auto tmp2 = tmp; tmp2 != merge_iter.end();)
+	//{
+	//	++tmp2;
+	//	if (*tmp.get() > *tmp2.get())
+	//	{
+	//		std::cout << "Something went wrong" << std::endl;
+	//	}
+	//	//tmp = tmp2;
+	//}
 }

@@ -9,50 +9,40 @@ class merge_range;
 
 template<typename Iterator>
 class merge_iterator;
-template<typename T>
 
-class merge_range<T> final
+template<typename Iterator_type>
+class merge_range<Iterator_type> final
 {
 public:
-	using value_type = typename std::iterator_traits<T>::value_type;
-	merge_range(const std::vector<std::pair<T, T>>& vector_of_pairs_of_iterators)
+	using value_type = typename std::iterator_traits<Iterator_type>::value_type;
+	merge_range(const std::vector<std::pair<Iterator_type, Iterator_type>>& vector_of_pairs_of_iterators)
 	{
 		pair_container = vector_of_pairs_of_iterators;
 		for (size_t i = 0; i < pair_container.size(); ++i)
 		{
-			size_ += std::distance(pair_container[i].first, pair_container[i].second);
 			container_of_begin_iterators.push_back(pair_container[i].first);
 		}
+		iterator.iterator_position = container_of_begin_iterators;
 	}
-	merge_iterator<T> begin()
+	merge_iterator<Iterator_type> begin()
 	{
 		auto begin = iterator;
 		if (iterator.iterator_container.size() != 0)
 		{
-			begin.position = 0;
-			return begin;
+			return end();
 		}
-		begin++;
+		++begin;
 		return begin;
 	}
-	merge_iterator<T> end()
+	merge_iterator<Iterator_type> end()
 	{
-		auto end = iterator;
-		for (int i = end.position; i < static_cast<int>(size_); ++i) {
-			end++;
-		}
-		return end;
-	}
-	size_t size() const
-	{
-		return size_;
+		return *merge_iterator<Iterator_type>::end;
 	}
 private:
-	merge_iterator<T> iterator = merge_iterator<T>::merge_iterator(*this);
-	std::vector<std::pair<T, T>>  pair_container;
-	std::vector<T> container_of_begin_iterators;
-	size_t size_ = 0;
-	friend class merge_iterator<T>;
+	merge_iterator<Iterator_type> iterator = merge_iterator<Iterator_type>::merge_iterator(*this);
+	std::vector<std::pair<Iterator_type, Iterator_type>>  pair_container;
+	std::vector<Iterator_type> container_of_begin_iterators;
+	friend class merge_iterator<Iterator_type>;
 };
 
 template<typename Iterator>
@@ -62,13 +52,12 @@ public:
 	merge_iterator(merge_range<Iterator>& new_parent)
 	{
 		parent = &new_parent;
-		iterator_position = &new_parent.container_of_begin_iterators;
 	}
 	merge_iterator& operator*(const merge_iterator&)
 	{
 		return this;
 	}
-	merge_iterator operator++(int) {
+	merge_iterator operator++() {
 		Iterator it;
 		if (position + 1 < static_cast<int>(iterator_container.size()))
 		{
@@ -81,22 +70,22 @@ public:
 			auto not_first_iteration = false;
 			auto elem_founded = false;
 			for (size_t i = 1; i < parent->pair_container.size(); ++i) {
-				if ((*iterator_position)[j] == parent->pair_container[j].second) {
+				if (iterator_position[j] == parent->pair_container[j].second) {
 					break;
 				}
-				if ((*iterator_position)[i] == parent->pair_container[i].second) {
+				if (iterator_position[i] == parent->pair_container[i].second) {
 					continue;
 				}
-				if (*(*iterator_position)[i] < *(*iterator_position)[j]) {
+				if (*(iterator_position)[i] < *(iterator_position)[j]) {
 					if (not_first_iteration) {
-						if (*it > * (*iterator_position)[i]) {
-							it = (*iterator_position)[i];
+						if (*it > * (iterator_position)[i]) {
+							it = (iterator_position)[i];
 							elem_founded = true;
 							k = i;
 						}
 					}
 					else {
-						it = (*iterator_position)[i];
+						it = (iterator_position)[i];
 						elem_founded = true;
 						k = i;
 					}
@@ -104,14 +93,14 @@ public:
 				}
 				else {
 					if (not_first_iteration) {
-						if (*it > * (*iterator_position)[j]) {
-							it = (*iterator_position)[j];
+						if (*it > * (iterator_position)[j]) {
+							it = iterator_position[j];
 							elem_founded = true;
 							k = j;
 						}
 					}
 					else {
-						it = (*iterator_position)[j];
+						it = iterator_position[j];
 						elem_founded = true;
 						k = j;
 					}
@@ -119,19 +108,19 @@ public:
 				}
 			}
 			if (elem_founded == true) {
-				(*iterator_position)[k]++;
+				++iterator_position[k];
 				++position;
 				iterator_container.push_back(it);
 				return *this;
 			}
-			if ((*iterator_position)[j] == parent->pair_container[j].second) {
+			if ((iterator_position)[j] == parent->pair_container[j].second) {
 				++j;
 			}
 		}
 		//unreacheble code
 		return *this;
 	}
-	merge_iterator operator--(int)
+	merge_iterator operator--()
 	{
 		if (position - 1 > -1)
 		{
@@ -139,6 +128,14 @@ public:
 			return *this;
 		}
 	}
+	/*bool operator==(const merge_iterator& compared)
+	{
+		return this == compared;
+	}
+	bool operator!=(const merge_iterator& compared)
+	{
+		return !(this == compared);
+	}*/
 	int operator -(const merge_iterator& subtrahend)
 	{
 		return subtrahend.position - this->position;
@@ -154,8 +151,9 @@ public:
 		return iterator_container[position];
 	}
 private:
-	const merge_range<Iterator>* parent;
-	std::vector<Iterator>* iterator_position;
+	inline static const merge_iterator* end = nullptr;
+	 merge_range<Iterator>* parent;
+	std::vector<Iterator> iterator_position;
 	std::vector<Iterator> iterator_container;
 	int position = -1;
 	friend class merge_range<Iterator>;
