@@ -57,6 +57,10 @@ public:
 	{
 		return this;
 	}
+	bool value_compare(Iterator first, Iterator second)
+	{
+		return *first > *second;
+	}
 	merge_iterator operator++() {
 		Iterator it;
 		if (position + 1 < static_cast<int>(iterator_container.size()))
@@ -76,7 +80,7 @@ public:
 				if (iterator_position[i] == parent->pair_container[i].second) {
 					continue;
 				}
-				if (*(iterator_position)[i] < *(iterator_position)[j]) {
+				if (value_compare ((iterator_position)[j],(iterator_position)[i])) {
 					if (not_first_iteration) {
 						if (*it > * (iterator_position)[i]) {
 							it = (iterator_position)[i];
@@ -117,7 +121,6 @@ public:
 				++j;
 			}
 		}
-		//unreacheble code
 		return *this;
 	}
 	merge_iterator operator--()
