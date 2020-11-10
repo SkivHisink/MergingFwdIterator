@@ -17,15 +17,10 @@ int main()
 	vector_of_iterators.emplace_back(first_container.begin(), first_container.end());
 	vector_of_iterators.emplace_back(second_container.begin(), second_container.end());
 	vector_of_iterators.emplace_back(third_container.begin(), third_container.end());
-	merge_range<std::vector<int>::iterator> merge_iter(vector_of_iterators);
+	Merge_range<std::vector<int>::iterator> merge_iter(vector_of_iterators);
 	auto tmp = merge_iter.begin();
-	//for (auto tmp2 = tmp; tmp2 != merge_iter.end();)
-	//{
-	//	++tmp2;
-	//	if (*tmp.get() > *tmp2.get())
-	//	{
-	//		std::cout << "Something went wrong" << std::endl;
-	//	}
-	//	//tmp = tmp2;
-	//}
+	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
+	{
+		std::cout << *tmp.get() << " ";
+	}
 }
