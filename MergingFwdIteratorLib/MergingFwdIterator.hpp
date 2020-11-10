@@ -136,7 +136,7 @@ public:
 
 	auto get(size_t _pos)
 	{
-		if (_pos <= iterator_container.size() && _pos >= 0) {
+		if (_pos < iterator_container.size() && _pos >= 0) {
 			return iterator_container[_pos];
 		}
 		throw OutOfRangeException();

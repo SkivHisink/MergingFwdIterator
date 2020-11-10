@@ -166,10 +166,10 @@ TEST(List_container_test, int_test)
 	std::mt19937 random(0);
 	std::vector<std::list<int>> container_of_int_list;
 	int number_of_vectors = random() % MAX_SIZE;
+	int number_of_elements_in_container = random() % MAX_SIZE;
 	for (auto i = 0; i < number_of_vectors; ++i)
 	{
 		std::list<int> temp;
-		int number_of_elements_in_container = random() % MAX_SIZE;
 		for (auto j = 0; j < number_of_elements_in_container; ++j)
 		{
 			temp.push_back(static_cast<int>(random() % 1000));
@@ -205,4 +205,42 @@ TEST(Special_test, empty_container)
 	EXPECT_THROW(*tmp.get(1000), OutOfRangeException);
 	EXPECT_THROW(*tmp.get(-1000), OutOfRangeException);
 	EXPECT_THROW(*tmp.get(), OutOfRangeException);
+}
+TEST(Special_test, throw_test)
+{
+	std::mt19937 random(0);
+	std::vector<std::vector<int>> container_of_int_vectors;
+	int number_of_vectors = random() % MAX_SIZE;
+	int number_of_elements_in_container = random() % MAX_SIZE;
+	for (auto i = 0; i < number_of_vectors; ++i)
+	{
+		std::vector<int> temp;
+		for (auto j = 0; j < number_of_elements_in_container; ++j)
+		{
+			temp.push_back(random() % 1000);
+		}
+		container_of_int_vectors.push_back(temp);
+		std::sort(container_of_int_vectors[i].begin(), container_of_int_vectors[i].end());
+	}
+	using it_pair = std::pair<std::vector<int>::iterator, std::vector<int>::iterator>;
+	std::vector<it_pair> iter_vec;
+	for (auto i = 0; i < container_of_int_vectors.size(); ++i)
+	{
+		iter_vec.emplace_back(container_of_int_vectors[i].begin(), container_of_int_vectors[i].end());
+	}
+	Merge_range<std::vector<int>::iterator> merge_iter(iter_vec);
+	auto iter = merge_iter.begin();
+	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
+	{
+		EXPECT_THROW(*tmp.get(1000), OutOfRangeException);
+		EXPECT_THROW(*tmp.get(-1000), OutOfRangeException);
+		EXPECT_NO_THROW(*tmp.get(), OutOfRangeException);
+		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
+			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_NO_THROW(*tmp2.get(), OutOfRangeException);
+		}
+		iter = tmp;
+	}
+	EXPECT_NO_THROW(*iter.get(number_of_vectors * number_of_elements_in_container - 1), OutOfRangeException);
+	EXPECT_THROW(*iter.get(number_of_vectors * number_of_elements_in_container), OutOfRangeException);
 }
