@@ -23,7 +23,7 @@ int main()
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		std::cout << *tmp.get() << " ";
-		if (prev_numb < *tmp.get())
+		if (prev_numb > *tmp.get())
 		{
 			std::cout << std::endl << "Something went wrong. Previous number was bigger than next." << std::endl;
 		}
