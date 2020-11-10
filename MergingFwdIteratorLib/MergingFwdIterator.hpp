@@ -62,7 +62,7 @@ public:
 	explicit Merge_iterator(Merge_range<Iterator>* new_parent) : parent(*new_parent) {}
 
 	Merge_iterator operator++() {
-		Iterator it;
+		Iterator desired_iterator;
 		if (position + 1 < static_cast<int>(iterator_container.size()) && position != -1)
 		{
 			++position;
@@ -70,9 +70,9 @@ public:
 		}
 		for (size_t j = 0; j != parent.pair_container.size();)
 		{
-			size_t k = 0;
+			size_t pos_counter = 0;
 			auto not_first_iteration = false;
-			auto elem_founded = false;
+			auto iterator_founded = false;
 			for (size_t i = 1; i < parent.pair_container.size(); ++i) {
 				if (iterator_position[j] == parent.pair_container[j].second) {//исправить секонд ƒенису пон€тно а так непон€тно
 					break;
@@ -81,16 +81,16 @@ public:
 					continue;
 				}
 				if (value_compare((iterator_position)[j], (iterator_position)[i])) {
-					assing_if_found(it, k, not_first_iteration, elem_founded, i);
+					assing_if_found(desired_iterator, pos_counter, not_first_iteration, iterator_founded, i);
 				}
 				else {
-					assing_if_found(it, k, not_first_iteration, elem_founded, j);
+					assing_if_found(desired_iterator, pos_counter, not_first_iteration, iterator_founded, j);
 				}
 			}
-			if (elem_founded == true) {
-				++iterator_position[k];
+			if (iterator_founded == true) {
+				++iterator_position[pos_counter];
 				++position;
-				iterator_container.push_back(it);
+				iterator_container.push_back(desired_iterator);
 				return *this;
 			}
 			if ((iterator_position)[j] == parent.pair_container[j].second) {
