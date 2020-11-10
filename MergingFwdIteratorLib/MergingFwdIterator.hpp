@@ -1,12 +1,17 @@
 #pragma once
-#include <iostream>
 #include <vector>
 #include <iterator>
+#include <string>
 template<typename T, typename = void>
 class Merge_range;
 
-//template <typename Iter>
-//constexpr bool is_random_access_iter_v = std::is_base_of_v<std::random_access_iterator_tag, std::iterator_traits<Iter>::iterator_category>;
+//эксепшн в отдельный файл
+//эксплиситы??
+//конст чар убрать из эксепшена
+//хранить ссылку
+//энду сделать -1 убрать -2
+//убрать второй конструктор у итератора
+//добавить const'ов
 
 template<typename Iterator>
 class Merge_iterator;
@@ -16,78 +21,63 @@ class Merge_range<Iterator_type> final
 {
 public:
 	using value_type = typename std::iterator_traits<Iterator_type>::value_type;
-	Merge_range(const std::vector<std::pair<Iterator_type, Iterator_type>>& vector_of_pairs_of_iterators)
+	explicit Merge_range(const std::vector<std::pair<Iterator_type, Iterator_type>>& vector_of_pairs_of_iterators) : pair_container(vector_of_pairs_of_iterators)
 	{
-		pair_container = vector_of_pairs_of_iterators;
 		for (size_t i = 0; i < pair_container.size(); ++i)
 		{
-			container_of_begin_iterators.push_back(pair_container[i].first);
+			iterator.iterator_position.push_back(pair_container[i].first);
 		}
-		iterator.iterator_position = container_of_begin_iterators;
 	}
-	Merge_iterator<Iterator_type> begin()
+	const Merge_iterator<Iterator_type> begin()
 	{
-		auto begin = iterator;
 		if (iterator.iterator_container.size() != 0)
 		{
-			return end();
+			iterator.position = 0;
+			return iterator;
 		}
-		++begin;
-		return begin;
+		return ++iterator;
 	}
-	Merge_iterator<Iterator_type> end()
+	const Merge_iterator<Iterator_type> end()
 	{
 		return end_iterator_;
 	}
 private:
-	Merge_iterator<Iterator_type> iterator = Merge_iterator<Iterator_type>::Merge_iterator(*this);
 	std::vector<std::pair<Iterator_type, Iterator_type>>  pair_container;
-	std::vector<Iterator_type> container_of_begin_iterators;
+	Merge_iterator<Iterator_type> iterator = Merge_iterator<Iterator_type>::Merge_iterator(this);
 	friend class Merge_iterator<Iterator_type>;
-	const Merge_iterator<Iterator_type> end_iterator_ = Merge_iterator<Iterator_type>::Merge_iterator(*this, true);
+	const Merge_iterator<Iterator_type> end_iterator_ = Merge_iterator<Iterator_type>::Merge_iterator(this);
 };
 class OutOfRangeException final :std::exception
 {
-	const char* m_error = "Out of range position was sent in function";
+	std::string m_error = "Out of range position was sent in function";
 public:
 	OutOfRangeException() {}
-	const char* what() noexcept { return m_error; }
+	const char* what() noexcept { return m_error.c_str(); }
 };
+
 template<typename Iterator>
 class Merge_iterator final
 {
 public:
-
-	Merge_iterator(Merge_range<Iterator>& new_parent)
-	{
-		parent = &new_parent;
-	}
-	Merge_iterator& operator*(const Merge_iterator&)
-	{
-		return this;
-	}
-	bool value_compare(Iterator first, Iterator second)
-	{
-		return *first > * second;
-	}
+	explicit Merge_iterator(Merge_range<Iterator>* new_parent) : parent(*new_parent) {}
 
 	Merge_iterator operator++() {
 		Iterator it;
-		if (position + 1 < static_cast<int>(iterator_container.size()) && position != -2)
+		if (position + 1 < static_cast<int>(iterator_container.size()) && position != -1)
 		{
 			++position;
 			return *this;
 		}
-		for (size_t j = 0; j != parent->pair_container.size();)
+		for (size_t j = 0; j != parent.pair_container.size();)
 		{
 			size_t k = 0;
 			auto not_first_iteration = false;
 			auto elem_founded = false;
-			for (size_t i = 1; i < parent->pair_container.size(); ++i) {
-				if (iterator_position[j] == parent->pair_container[j].second) {
+			for (size_t i = 1; i < parent.pair_container.size(); ++i) {
+				if (iterator_position[j] == parent.pair_container[j].second) {//исправить секонд Денису понятно а так непонятно
 					break;
 				}
-				if (iterator_position[i] == parent->pair_container[i].second) {
+				if (iterator_position[i] == parent.pair_container[i].second) {
 					continue;
 				}
 				if (value_compare((iterator_position)[j], (iterator_position)[i])) {
@@ -103,11 +93,11 @@ public:
 				iterator_container.push_back(it);
 				return *this;
 			}
-			if ((iterator_position)[j] == parent->pair_container[j].second) {
+			if ((iterator_position)[j] == parent.pair_container[j].second) {
 				++j;
 			}
 		}
-		position = -2;
+		position = -1;
 		return *this;
 	}
 
@@ -117,24 +107,34 @@ public:
 		{
 			--position;
 		}
-		if (position == -2 && iterator_container.size() > 0)
+		if (position == -1 && iterator_container.size() > 0)
 		{
 			position = static_cast<int>(iterator_container.size()) - 1;
 		}
 		return *this;
 	}
 
+	Merge_iterator& operator=(const Merge_iterator iterator)
+	{
+		if (&this->parent == &iterator.parent)
+		{
+			this->position = iterator.position;
+			this->iterator_position = iterator.iterator_position;
+			this->iterator_container = iterator.iterator_container;
+		}
+		return *this;
+	}
 	bool operator==(const Merge_iterator& compared)
 	{
-		return this->parent == compared.parent && this->position == compared.position;
+		return &this->parent == &compared.parent && this->position == compared.position;
 	}
 
 	bool operator!=(const Merge_iterator& compared)
 	{
-		return this->parent == compared.parent && this->position != compared.position;
+		return &this->parent == &compared.parent && this->position != compared.position;
 	}
 
-	auto get(size_t _pos)
+	const auto get(size_t _pos)
 	{
 		if (_pos < iterator_container.size() && _pos >= 0) {
 			return iterator_container[_pos];
@@ -142,40 +142,39 @@ public:
 		throw OutOfRangeException();
 	}
 
-	auto get()
+	const auto get()
 	{
-		if (position >= 0) {
+		if (position >= 0 && position < iterator_container.size()) {
 			return iterator_container[position];
 		}
 		throw OutOfRangeException();
 	}
 
 private:
-	void assing_if_found(Iterator& it, size_t& k, bool& not_first_iteration, bool& elem_founded, size_t i)
+	void assing_if_found(Iterator& desired_iterator, size_t& pair_numb_pos, bool& not_first_iteration, bool& elem_founded, size_t pos_in_iter_pos)
 	{
 		if (not_first_iteration) {
-			if (*it > * (iterator_position)[i]) {
-				it = (iterator_position)[i];
+			if (*desired_iterator > * (iterator_position)[pos_in_iter_pos]) {
+				desired_iterator = (iterator_position)[pos_in_iter_pos];
 				elem_founded = true;
-				k = i;
+				pair_numb_pos = pos_in_iter_pos;
 			}
 		}
 		else {
-			it = iterator_position[i];
+			desired_iterator = iterator_position[pos_in_iter_pos];
 			elem_founded = true;
-			k = i;
+			pair_numb_pos = pos_in_iter_pos;
 		}
 		not_first_iteration = true;
 	}
-	Merge_iterator(Merge_range<Iterator>& new_parent, bool end_flag)
+	bool value_compare(Iterator first, Iterator second)
 	{
-		parent = &new_parent;
-		position = -2;
+		return *first > * second;
 	}
-	Merge_range<Iterator>* parent;
+	Merge_range<Iterator>& parent;
 	std::vector<Iterator> iterator_position;
 	std::vector<Iterator> iterator_container;
 	int position = -1;
 	friend class Merge_range<Iterator>;
-	friend std::ostream& operator<<(std::ostream& stream, const Merge_iterator& iter);
+	//friend std::ostream& operator<<(std::ostream& stream, const Merge_iterator& iter);
 };

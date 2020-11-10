@@ -18,7 +18,6 @@ int main()
 	vector_of_iterators.emplace_back(second_container.begin(), second_container.end());
 	vector_of_iterators.emplace_back(third_container.begin(), third_container.end());
 	Merge_range<std::vector<int>::iterator> merge_iter(vector_of_iterators);
-	auto tmp = merge_iter.begin();
 	int prev_numb = 0;
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{

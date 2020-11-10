@@ -242,5 +242,5 @@ TEST(Special_test, throw_test)
 		iter = tmp;
 	}
 	EXPECT_NO_THROW(*iter.get(number_of_vectors * number_of_elements_in_container - 1), OutOfRangeException);
-	EXPECT_THROW(*iter.get(number_of_vectors * number_of_elements_in_container), OutOfRangeException);
+	EXPECT_THROW( *iter.get(number_of_vectors * number_of_elements_in_container), OutOfRangeException);
 }
