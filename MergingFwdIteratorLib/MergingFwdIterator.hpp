@@ -1,18 +1,18 @@
 #pragma once
 #include <vector>
 #include <iterator>
-#include <string>
+#include "OutOfRangeException.h"
 template<typename T, typename = void>
 class Merge_range;
 
-//эксепшн в отдельный файл
-//эксплиситы??
-//конст чар убрать из эксепшена
-//хранить ссылку
-//энду сделать -1 убрать -2
-//убрать второй конструктор у итератора
-//добавить const'ов
-
+//эксепшн в отдельный файл|+
+//эксплиситы?? |+?
+//конст чар убрать из эксепшена|+
+//хранить ссылку на родителя|+
+//энду сделать -1 убрать -2|+
+//убрать второй конструктор у итератора|+
+//добавить const'ов|??
+//исправить секонд в operator++() Денису понятно, а постороннему программисту возможно будет непонятно|????
 template<typename Iterator>
 class Merge_iterator;
 
@@ -47,13 +47,7 @@ private:
 	friend class Merge_iterator<Iterator_type>;
 	const Merge_iterator<Iterator_type> end_iterator_ = Merge_iterator<Iterator_type>::Merge_iterator(this);
 };
-class OutOfRangeException final :std::exception
-{
-	std::string m_error = "Out of range position was sent in function";
-public:
-	OutOfRangeException() {}
-	const char* what() noexcept { return m_error.c_str(); }
-};
+
 
 template<typename Iterator>
 class Merge_iterator final
@@ -74,7 +68,7 @@ public:
 			auto not_first_iteration = false;
 			auto iterator_founded = false;
 			for (size_t i = 1; i < parent.pair_container.size(); ++i) {
-				if (iterator_position[j] == parent.pair_container[j].second) {//исправить секонд Денису понятно а так непонятно
+				if (iterator_position[j] == parent.pair_container[j].second) {
 					break;
 				}
 				if (iterator_position[i] == parent.pair_container[i].second) {
@@ -176,5 +170,4 @@ private:
 	std::vector<Iterator> iterator_container;
 	int position = -1;
 	friend class Merge_range<Iterator>;
-	//friend std::ostream& operator<<(std::ostream& stream, const Merge_iterator& iter);
 };

@@ -18,5 +18,8 @@
     <ClInclude Include="MergingFwdIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OutOfRangeException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
