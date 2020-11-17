@@ -2,17 +2,10 @@
 #include <vector>
 #include <iterator>
 #include "OutOfRangeException.h"
+
 template<typename T, typename = void>
 class Merge_range;
 
-//эксепшн в отдельный файл|+
-//эксплиситы?? |+?
-//конст чар убрать из эксепшена|+
-//хранить ссылку на родителя|+
-//энду сделать -1 убрать -2|+
-//убрать второй конструктор у итератора|+
-//добавить const'ов|??
-//исправить секонд в operator++() Денису понятно, а постороннему программисту возможно будет непонятно|????
 template<typename Iterator>
 class Merge_iterator;
 
@@ -28,7 +21,8 @@ public:
 			iterator.iterator_position.push_back(pair_container[i].first);
 		}
 	}
-	const Merge_iterator<Iterator_type> begin()
+
+	Merge_iterator<Iterator_type> begin()
 	{
 		if (iterator.iterator_container.size() != 0)
 		{
@@ -37,10 +31,12 @@ public:
 		}
 		return ++iterator;
 	}
-	const Merge_iterator<Iterator_type> end()
+
+	Merge_iterator<Iterator_type> end() const
 	{
 		return end_iterator_;
 	}
+
 private:
 	std::vector<std::pair<Iterator_type, Iterator_type>>  pair_container;
 	Merge_iterator<Iterator_type> iterator = Merge_iterator<Iterator_type>::Merge_iterator(this);
@@ -67,18 +63,23 @@ public:
 			size_t pos_counter = 0;
 			auto not_first_iteration = false;
 			auto iterator_founded = false;
+			auto& [begin_j_container_iterator, end_j_container_iterator] = parent.pair_container[j];
+
 			for (size_t i = 1; i < parent.pair_container.size(); ++i) {
-				if (iterator_position[j] == parent.pair_container[j].second) {
+				auto& [begin_i_container_iterator, end_i_container_iterator] = parent.pair_container[i];
+				if (iterator_position[j] == end_j_container_iterator) {
 					break;
 				}
-				if (iterator_position[i] == parent.pair_container[i].second) {
+				if (iterator_position[i] == end_i_container_iterator) {
 					continue;
 				}
 				if (value_compare((iterator_position)[j], (iterator_position)[i])) {
-					assing_if_found(desired_iterator, pos_counter, not_first_iteration, iterator_founded, i);
+					assing_if_found(desired_iterator, pos_counter,
+						not_first_iteration, iterator_founded, i);
 				}
 				else {
-					assing_if_found(desired_iterator, pos_counter, not_first_iteration, iterator_founded, j);
+					assing_if_found(desired_iterator, pos_counter,
+						not_first_iteration, iterator_founded, j);
 				}
 			}
 			if (iterator_founded == true) {
@@ -95,9 +96,16 @@ public:
 		return *this;
 	}
 
+	Merge_iterator operator++(int)
+	{
+		Merge_iterator temp = *this;
+		++* this;
+		return temp;
+	}
+
 	Merge_iterator operator--()
 	{
-		if (position - 1 > -1)
+		if (position > 0)
 		{
 			--position;
 		}
@@ -106,6 +114,13 @@ public:
 			position = static_cast<int>(iterator_container.size()) - 1;
 		}
 		return *this;
+	}
+
+	Merge_iterator operator--(int)
+	{
+		Merge_iterator temp = *this;
+		--* this;
+		return temp;
 	}
 
 	Merge_iterator& operator=(const Merge_iterator iterator)
@@ -128,7 +143,7 @@ public:
 		return &this->parent == &compared.parent && this->position != compared.position;
 	}
 
-	const auto get(size_t _pos)
+	auto get(size_t _pos) const
 	{
 		if (_pos < iterator_container.size() && _pos >= 0) {
 			return iterator_container[_pos];
@@ -136,7 +151,7 @@ public:
 		throw OutOfRangeException();
 	}
 
-	const auto get()
+	auto get() const
 	{
 		if (position >= 0 && position < iterator_container.size()) {
 			return iterator_container[position];
@@ -149,7 +164,7 @@ private:
 	{
 		if (not_first_iteration) {
 			if (*desired_iterator > * (iterator_position)[pos_in_iter_pos]) {
-				desired_iterator = (iterator_position)[pos_in_iter_pos];
+				desired_iterator = iterator_position[pos_in_iter_pos];
 				elem_founded = true;
 				pair_numb_pos = pos_in_iter_pos;
 			}
@@ -161,7 +176,7 @@ private:
 		}
 		not_first_iteration = true;
 	}
-	bool value_compare(Iterator first, Iterator second)
+	bool value_compare(Iterator first, Iterator second) const
 	{
 		return *first > * second;
 	}
