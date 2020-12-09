@@ -38,7 +38,7 @@ TEST(Vector_container_test, int_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -68,7 +68,7 @@ TEST(Vector_container_test, double_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -97,7 +97,7 @@ TEST(Deque_container_test, int_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -127,7 +127,7 @@ TEST(Deque_container_test, double_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -157,7 +157,7 @@ TEST(List_container_test, double_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -187,7 +187,7 @@ TEST(List_container_test, int_test)
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
+			EXPECT_TRUE(*tmp <= *tmp2);
 		}
 	}
 }
@@ -198,13 +198,9 @@ TEST(Special_test, empty_container)
 	Merge_range<std::list<int>::iterator> merge_iter(iter_vec);
 	auto tmp = merge_iter.begin();
 	EXPECT_TRUE(tmp == merge_iter.end());
-	++tmp;
+	EXPECT_THROW(++tmp, OutOfRangeException);
 	EXPECT_TRUE(tmp == merge_iter.end());
-	--tmp;
-	EXPECT_TRUE(tmp == merge_iter.end());
-	EXPECT_THROW(*tmp.get(1000), OutOfRangeException);
-	EXPECT_THROW(*tmp.get(-1000), OutOfRangeException);
-	EXPECT_THROW(*tmp.get(), OutOfRangeException);
+	EXPECT_THROW(*tmp, OutOfRangeException);
 }
 TEST(Special_test, throw_test)
 {
@@ -229,18 +225,12 @@ TEST(Special_test, throw_test)
 		iter_vec.emplace_back(container_of_int_vectors[i].begin(), container_of_int_vectors[i].end());
 	}
 	Merge_range<std::vector<int>::iterator> merge_iter(iter_vec);
-	auto iter = merge_iter.begin();
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
-		EXPECT_THROW(*tmp.get(1000), OutOfRangeException);
-		EXPECT_THROW(*tmp.get(-1000), OutOfRangeException);
-		EXPECT_NO_THROW(*tmp.get(), OutOfRangeException);
+		EXPECT_NO_THROW(*tmp, OutOfRangeException);
 		for (auto tmp2 = tmp; tmp2 != merge_iter.end(); ++tmp2) {
-			EXPECT_TRUE(*tmp.get() <= *tmp2.get());
-			EXPECT_NO_THROW(*tmp2.get(), OutOfRangeException);
+			EXPECT_TRUE(*tmp <= *tmp2);
+			EXPECT_NO_THROW(*tmp2, OutOfRangeException);
 		}
-		iter = tmp;
 	}
-	EXPECT_NO_THROW(*iter.get(number_of_vectors * number_of_elements_in_container - 1), OutOfRangeException);
-	EXPECT_THROW( *iter.get(number_of_vectors * number_of_elements_in_container), OutOfRangeException);
 }

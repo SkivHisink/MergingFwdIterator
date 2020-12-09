@@ -15,13 +15,14 @@ int main()
 	vector_of_iterators.emplace_back(third_container.begin(), third_container.end());
 	Merge_range<std::vector<int>::iterator> merge_iter(vector_of_iterators);
 	int prev_numb = 0;
+	auto tmp = merge_iter.begin();
 	for (auto tmp = merge_iter.begin(); tmp != merge_iter.end(); ++tmp)
 	{
-		std::cout << *tmp.get() << " ";
-		if (prev_numb > *tmp.get())
+		std::cout << *tmp << " ";
+		if (prev_numb > *tmp)
 		{
 			std::cout << std::endl << "Something went wrong. Previous number was bigger than next." << std::endl;
 		}
-		prev_numb = *tmp.get();
+		prev_numb = *tmp;
 	}
 }
